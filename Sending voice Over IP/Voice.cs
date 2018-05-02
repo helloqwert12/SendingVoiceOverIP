@@ -123,13 +123,13 @@ namespace Sending_voice_Over_IP
             sock = sc.Accept();
 
             //Prevent echo from itseft
-            IPEndPoint tempEndPoint = sock.RemoteEndPoint as IPEndPoint;
-            IPAddress temp_ip = IPAddress.Parse("127.0.0.1");
-            if (tempEndPoint.Address.Equals(temp_ip))
-            {
-                sc.Close();
-                VoiceReceive();
-            }
+            //IPEndPoint tempEndPoint = sock.RemoteEndPoint as IPEndPoint;
+            //IPAddress temp_ip = IPAddress.Parse("127.0.0.1");
+            //if (tempEndPoint.Address.Equals(temp_ip))
+            //{
+            //    sc.Close();
+            //    VoiceReceive();
+            //}
 
             ns = new NetworkStream(sock);
 

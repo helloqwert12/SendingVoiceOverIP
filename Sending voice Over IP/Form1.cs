@@ -34,7 +34,7 @@ namespace Sending_voice_Over_IP
 
         private void snd_btn(object sender, EventArgs e)
         {
-            v.Send(Get_privateIP(), 2000);
+            v.Send("192.168.1.101", 2000);
         }
 
 
