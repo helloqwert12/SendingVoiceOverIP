@@ -23,6 +23,7 @@ namespace Sending_voice_Over_IP
             IPHostEntry hostentery = Dns.GetHostEntry(hostname);
             IPAddress[] ip = hostentery.AddressList;
             return ip[ip.Length - 1].ToString();
+            
         }
 
         Voice v = new Voice();
@@ -34,7 +35,9 @@ namespace Sending_voice_Over_IP
 
         private void snd_btn(object sender, EventArgs e)
         {
-            v.Send("192.168.1.101", 2000);
+            String ip = Get_privateIP();
+            button1.Text = ip.ToString();
+            v.Send("", 2000);
         }
 
 

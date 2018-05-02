@@ -17,6 +17,8 @@ namespace Sending_voice_Over_IP
     { 
         private string ip;
         private string path = Application.StartupPath + "\\buffer.wav";
+
+        private Label label;
      
         public string Ip
         {
@@ -37,6 +39,16 @@ namespace Sending_voice_Over_IP
         private WaveFileWriter waveWriter = null;
         private System.Windows.Forms.Timer c_v = null;
         private Socket connector, sc, sock = null;
+
+        public Voice(Label label)
+        {
+            this.label = label;
+        }
+
+        public Voice()
+        {
+
+        }
 
         public void Send(string ip, int port)
         {
@@ -85,7 +97,7 @@ namespace Sending_voice_Over_IP
 
             connector = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
             IPEndPoint ie = new IPEndPoint(IPAddress.Parse(this.Ip), this.VPort);
-            ie.Address = IPAddress.Loopback;
+            //ie.Address = IPAddress.Loopback;
             connector.Connect(ie);
             connector.Send(Data_ary, 0, Data_ary.Length, 0);
             connector.Close();
@@ -116,20 +128,22 @@ namespace Sending_voice_Over_IP
         private void VoiceReceive()
         {
             sc = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);      
-            IPEndPoint ie = new IPEndPoint(0, this.VPort);
+            IPEndPoint ie = new IPEndPoint(IPAddress.Any, this.VPort);
 
             sc.Bind(ie);
             sc.Listen(0);
             sock = sc.Accept();
 
             //Prevent echo from itseft
-            //IPEndPoint tempEndPoint = sock.RemoteEndPoint as IPEndPoint;
-            //IPAddress temp_ip = IPAddress.Parse("127.0.0.1");
-            //if (tempEndPoint.Address.Equals(temp_ip))
-            //{
-            //    sc.Close();
-            //    VoiceReceive();
-            //}
+            IPEndPoint tempEndPoint = sock.RemoteEndPoint as IPEndPoint;
+            //label.Text = "Connected from " + tempEndPoint.ToString();
+            IPAddress temp_ip = IPAddress.Parse(Get_privateIP());
+            if (tempEndPoint.Address.Equals(IPAddress.Parse(Get_privateIP())) || 
+                tempEndPoint.Address.Equals(IPAddress.Parse("127.0.0.1")))
+            {
+                sc.Close();
+                VoiceReceive();
+            }
 
             ns = new NetworkStream(sock);
 
@@ -178,6 +192,13 @@ namespace Sending_voice_Over_IP
             GC.SuppressFinalize(this);
         }
 
+        private string Get_privateIP()
+        {
+            string hostname = Dns.GetHostName();
+            IPHostEntry hostentery = Dns.GetHostEntry(hostname);
+            IPAddress[] ip = hostentery.AddressList;
+            return ip[ip.Length - 1].ToString();
 
+        }
     }
 }
