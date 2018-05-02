@@ -128,7 +128,7 @@ namespace Sending_voice_Over_IP
         private void VoiceReceive()
         {
             sc = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);      
-            IPEndPoint ie = new IPEndPoint(IPAddress.Any, this.VPort);
+            IPEndPoint ie = new IPEndPoint(IPAddress.Parse(Get_privateIP()), this.VPort);
 
             sc.Bind(ie);
             sc.Listen(0);

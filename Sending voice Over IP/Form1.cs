@@ -37,7 +37,7 @@ namespace Sending_voice_Over_IP
         {
             String ip = Get_privateIP();
             button1.Text = ip.ToString();
-            v.Send("", 2000);
+            v.Send("192.168.1.107", 2000);
         }
 
 
