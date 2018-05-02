@@ -4,12 +4,13 @@ using System.IO;
 using System.Linq;
 using System.Media;
 using System.Net;
-using System.Net.Sockets;
+//using System.Net.Sockets;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using NAudio.Wave;
+using Quobject.SocketIoClientDotNet.Client;
 
 namespace Sending_voice_Over_IP
 {
@@ -17,6 +18,7 @@ namespace Sending_voice_Over_IP
     { 
         private string ip;
         private string path = Application.StartupPath + "\\buffer.wav";
+        private Socket socket = SocketAPI.GetInstance().GetSocket();
 
         private Label label;
      
@@ -35,10 +37,10 @@ namespace Sending_voice_Over_IP
         private Thread rec_thread;
         private  WaveIn sourceStream = null;
         private Byte[] Data_ary;
-        private NetworkStream ns;
+        //private NetworkStream ns;
         private WaveFileWriter waveWriter = null;
         private System.Windows.Forms.Timer c_v = null;
-        private Socket connector, sc, sock = null;
+        //private Socket connector, sc, sock = null;
 
         public Voice(Label label)
         {
@@ -95,12 +97,14 @@ namespace Sending_voice_Over_IP
         {
             Data_ary = File.ReadAllBytes(path);
 
-            connector = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
-            IPEndPoint ie = new IPEndPoint(IPAddress.Parse(this.Ip), this.VPort);
-            //ie.Address = IPAddress.Loopback;
-            connector.Connect(ie);
-            connector.Send(Data_ary, 0, Data_ary.Length, 0);
-            connector.Close();
+            //connector = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
+            //IPEndPoint ie = new IPEndPoint(IPAddress.Parse(this.Ip), this.VPort);
+            ////ie.Address = IPAddress.Loopback;
+            //connector.Connect(ie);
+            //connector.Send(Data_ary, 0, Data_ary.Length, 0);
+            //connector.Close();
+
+            socket.Emit("stream_audio", Data_ary);
 
             Recordwav();
         }
@@ -127,34 +131,41 @@ namespace Sending_voice_Over_IP
 
         private void VoiceReceive()
         {
-            sc = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);      
-            IPEndPoint ie = new IPEndPoint(IPAddress.Parse(Get_privateIP()), this.VPort);
+            //sc = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);      
+            //IPEndPoint ie = new IPEndPoint(IPAddress.Any, this.VPort);
 
-            sc.Bind(ie);
-            sc.Listen(0);
-            sock = sc.Accept();
+            //sc.Bind(ie);
+            //sc.Listen(0);
+            //sock = sc.Accept();
 
-            //Prevent echo from itseft
-            IPEndPoint tempEndPoint = sock.RemoteEndPoint as IPEndPoint;
-            //label.Text = "Connected from " + tempEndPoint.ToString();
-            IPAddress temp_ip = IPAddress.Parse(Get_privateIP());
-            if (tempEndPoint.Address.Equals(IPAddress.Parse(Get_privateIP())) || 
-                tempEndPoint.Address.Equals(IPAddress.Parse("127.0.0.1")))
+            ////Prevent echo from itseft
+            //IPEndPoint tempEndPoint = sock.RemoteEndPoint as IPEndPoint;
+            ////label.Text = "Connected from " + tempEndPoint.ToString();
+            //IPAddress temp_ip = IPAddress.Parse(Get_privateIP());
+            //if (tempEndPoint.Address.Equals(IPAddress.Parse(Get_privateIP())) || 
+            //    tempEndPoint.Address.Equals(IPAddress.Parse("127.0.0.1")))
+            //{
+            //    sc.Close();
+            //    VoiceReceive();
+            //}
+
+            //ns = new NetworkStream(sock);
+
+
+            //WriteBytes();
+            //sc.Close();
+
+            socket.On("stream_audio", (data) =>
             {
-                sc.Close();
-                VoiceReceive();
-            }
+                Stream stream = new MemoryStream((byte[]) data);
+                SoundPlayer sp = new SoundPlayer(stream);
+                sp.Play();
+            });
 
-            ns = new NetworkStream(sock);
-
-
-            WriteBytes();
-            sc.Close();
-
-            while (true)
-            {
-                VoiceReceive();
-            }
+            //while (true)
+            //{
+            //    VoiceReceive();
+            //}
         }
 
         //not used here but its useful to get the length of wav file
@@ -168,11 +179,11 @@ namespace Sending_voice_Over_IP
 
         private void WriteBytes()
         {
-            if (ns != null)
-            {
-                SoundPlayer sp = new SoundPlayer(ns);
-                sp.Play();
-            }
+            //if (ns != null)
+            //{
+            //    SoundPlayer sp = new SoundPlayer(ns);
+            //    sp.Play();
+            //}
         }
 
 
